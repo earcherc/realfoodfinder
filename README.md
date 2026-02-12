@@ -28,6 +28,10 @@ cp .env.example .env.local
 - `LOCAL_DATABASE_URL`: local Docker Postgres (default in `.env.example`).
 - `DATABASE_URL`: Neon URL for production/deployment.
 - `ADMIN_DASHBOARD_KEY`: optional key used by `/admin?key=...`.
+- `GITHUB_FEEDBACK_OWNER`: GitHub org/user that owns the feedback repo.
+- `GITHUB_FEEDBACK_REPO`: repository name for feedback issues.
+- `GITHUB_FEEDBACK_TOKEN`: GitHub token used by `/api/feedback`.
+- `GITHUB_FEEDBACK_LABELS`: optional comma-separated issue labels.
 
 4. Start local Postgres:
 
@@ -60,6 +64,7 @@ pnpm db:local:psql
 - `/locations`: approved location listing with details.
 - `/submit`: public location submission page.
 - `/admin`: moderation dashboard (approve/reject).
+- `/api/feedback`: create GitHub issue from feedback dialog.
 
 ## Notes
 
@@ -67,3 +72,16 @@ pnpm db:local:psql
 - If both are missing, the app falls back to in-memory sample data for quick development.
 - Neon docs often show `drizzle-orm/neon-http`, which is perfect for Neon-only apps. This project uses `drizzle-orm/node-postgres` so one setup works for both Neon and local Docker Postgres.
 - In production, lock down `/admin` with real auth (Clerk/Auth.js/etc.) instead of key-in-query.
+
+## GitHub Feedback Setup
+
+1. Ensure your feedback repo has Issues enabled.
+2. Create a fine-grained personal access token.
+3. Scope token access to the feedback repository only.
+4. Grant repository permission:
+   - `Issues`: `Read and write`
+5. Add these env vars in Vercel (Production/Preview):
+   - `GITHUB_FEEDBACK_OWNER`
+   - `GITHUB_FEEDBACK_REPO`
+   - `GITHUB_FEEDBACK_TOKEN`
+   - `GITHUB_FEEDBACK_LABELS` (optional, e.g. `feedback,from-site`)

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Leaf } from "lucide-react";
+import { FeedbackDialog } from "@/components/feedback-dialog";
 import { Button } from "@/components/ui/button";
 
 function isCurrent(pathname: string, target: string) {
@@ -35,6 +36,7 @@ export function SiteHeader() {
           <Button asChild>
             <Link href="/submit">Submit Location</Link>
           </Button>
+          <FeedbackDialog />
         </nav>
       </div>
     </header>

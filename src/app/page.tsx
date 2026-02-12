@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Globe, MapPinned } from "lucide-react";
+import { Globe } from "lucide-react";
 import { LocationCard } from "@/components/location-card";
 import { LocationMap } from "@/components/location-map";
 import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { listApprovedLocations } from "@/lib/location-repository";
 import { LOCATION_TYPES } from "@/lib/location-types";
 
@@ -28,17 +28,14 @@ export default async function Home() {
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
               Connecting people to real food around the world
             </h1>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Find trusted farms, stores, homes, and drop points in one place.
+            </p>
           </div>
         </section>
 
         <section>
           <Card className="border-emerald-100 shadow-sm">
-            <CardHeader className="space-y-2">
-              <CardTitle className="inline-flex items-center gap-2">
-                <MapPinned className="size-4 text-emerald-700" />
-                Global map
-              </CardTitle>
-            </CardHeader>
             <CardContent>
               <LocationMap locations={locations} />
             </CardContent>

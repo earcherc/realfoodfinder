@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { SlidersHorizontal } from "lucide-react";
 import type { LocationRecord } from "@/lib/location-model";
 import {
   FOOD_OPTIONS,
@@ -59,9 +60,27 @@ export function LocationMap({ locations }: LocationMapProps) {
 
   return (
     <div className="space-y-4">
-      <LocationMapClient locations={filteredLocations} />
+      <div className="relative">
+        <LocationMapClient locations={filteredLocations} />
+        <button
+          type="button"
+          onClick={() => {
+            document.getElementById("map-filters")?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }}
+          className="absolute right-3 top-3 inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/90 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur hover:bg-background"
+        >
+          <SlidersHorizontal className="size-3.5" />
+          Filters
+        </button>
+      </div>
 
-      <div className="space-y-4 rounded-xl border border-border/70 bg-background/85 p-4">
+      <div
+        id="map-filters"
+        className="space-y-4 rounded-xl border border-border/70 bg-background/85 p-4"
+      >
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm font-medium">
             Showing {filteredLocations.length} of {locations.length} locations

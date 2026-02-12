@@ -4,13 +4,9 @@ import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { linkSubmissions } from "@/db/schema";
+import { matchCountry } from "@/lib/countries";
 import type { LinkRecord } from "@/lib/link-model";
-import {
-  LINK_PRODUCT_OPTIONS,
-  LOCATION_STATUS_VALUES,
-  TAG_OPTIONS,
-  type LocationStatus,
-} from "@/lib/location-types";
+import { LOCATION_STATUS_VALUES, type LocationStatus } from "@/lib/location-types";
 
 const optionalString = z
   .string()
@@ -30,19 +26,62 @@ const statusSchema = z.enum(
   LOCATION_STATUS_VALUES as [LocationStatus, ...LocationStatus[]],
 );
 
-const productSchema = z.enum(LINK_PRODUCT_OPTIONS);
-const tagSchema = z.enum(TAG_OPTIONS);
+const listItemSchema = z.string().trim().min(1).max(60);
+
+function normalizeArrayInput(list: string[]) {
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+
+  for (const item of list) {
+    const value = item.trim();
+
+    if (!value) {
+      continue;
+    }
+
+    const key = value.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    normalized.push(value);
+  }
+
+  return normalized;
+}
+
+const countrySchema = z
+  .string()
+  .trim()
+  .min(2)
+  .max(100)
+  .refine((value) => Boolean(matchCountry(value)), {
+    message: "Select a valid country from the list.",
+  })
+  .transform((value) => matchCountry(value) ?? value);
 
 export const linkSubmissionSchema = z.object({
   title: z.string().trim().min(2).max(160),
   url: z.string().trim().url().max(2000),
-  country: z.string().trim().min(2).max(100),
+  country: countrySchema,
   description: optionalString,
   products: z
-    .array(productSchema)
-    .min(1, "Select at least one product type.")
-    .max(12),
-  tags: z.array(tagSchema).max(12).default([]),
+    .array(listItemSchema)
+    .transform((list) => normalizeArrayInput(list))
+    .refine((list) => list.length > 0, {
+      message: "Select at least one product type.",
+    })
+    .refine((list) => list.length <= 12, {
+      message: "Select up to 12 product types.",
+    }),
+  tags: z
+    .array(listItemSchema)
+    .default([])
+    .transform((list) => normalizeArrayInput(list))
+    .refine((list) => list.length <= 12, {
+      message: "Select up to 12 tags.",
+    }),
   submitterName: optionalShortString,
   submitterEmail: z.string().trim().email().max(255),
 });

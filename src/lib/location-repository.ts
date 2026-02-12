@@ -7,10 +7,8 @@ import { locations } from "@/db/schema";
 import { geocodeAddress } from "@/lib/geocode";
 import type { LocationRecord } from "@/lib/location-model";
 import {
-  FOOD_OPTIONS,
   LOCATION_STATUS_VALUES,
   LOCATION_TYPE_VALUES,
-  TAG_OPTIONS,
   type LocationStatus,
   type LocationType,
 } from "@/lib/location-types";
@@ -37,8 +35,30 @@ const locationStatusSchema = z.enum(
   LOCATION_STATUS_VALUES as [LocationStatus, ...LocationStatus[]],
 );
 
-const foodOptionSchema = z.enum(FOOD_OPTIONS);
-const tagOptionSchema = z.enum(TAG_OPTIONS);
+const listItemSchema = z.string().trim().min(1).max(60);
+
+function normalizeArrayInput(list: string[]) {
+  const seen = new Set<string>();
+  const normalized: string[] = [];
+
+  for (const item of list) {
+    const value = item.trim();
+
+    if (!value) {
+      continue;
+    }
+
+    const key = value.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    normalized.push(value);
+  }
+
+  return normalized;
+}
 
 export const locationSubmissionSchema = z.object({
   name: z.string().trim().min(2).max(120),
@@ -46,10 +66,21 @@ export const locationSubmissionSchema = z.object({
   description: optionalString,
   address: z.string().trim().min(5).max(255),
   foods: z
-    .array(foodOptionSchema)
-    .min(1, "Select at least one food item.")
-    .max(16),
-  tags: z.array(tagOptionSchema).max(16).default([]),
+    .array(listItemSchema)
+    .transform((list) => normalizeArrayInput(list))
+    .refine((list) => list.length > 0, {
+      message: "Select at least one food item.",
+    })
+    .refine((list) => list.length <= 16, {
+      message: "Select up to 16 food items.",
+    }),
+  tags: z
+    .array(listItemSchema)
+    .default([])
+    .transform((list) => normalizeArrayInput(list))
+    .refine((list) => list.length <= 16, {
+      message: "Select up to 16 tags.",
+    }),
   submitterName: optionalShortString,
   submitterEmail: z.string().trim().email().max(255),
 });

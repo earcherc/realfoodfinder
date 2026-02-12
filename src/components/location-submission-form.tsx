@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
 import Turnstile from "react-turnstile";
@@ -49,6 +49,20 @@ function toggleArrayValue(list: string[], value: string) {
     : [...list, value];
 }
 
+function addCustomValue(list: string[], rawValue: string) {
+  const value = rawValue.trim();
+
+  if (!value) {
+    return list;
+  }
+
+  if (list.some((item) => item.toLowerCase() === value.toLowerCase())) {
+    return list;
+  }
+
+  return [...list, value];
+}
+
 function turnstileErrorMessage(error: unknown) {
   const code =
     typeof error === "string"
@@ -69,9 +83,23 @@ export function LocationSubmissionForm() {
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [values, setValues] = useState<FormValues>(DEFAULT_VALUES);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [foodOtherValue, setFoodOtherValue] = useState("");
+  const [tagOtherValue, setTagOtherValue] = useState("");
+  const [showFoodOtherInput, setShowFoodOtherInput] = useState(false);
+  const [showTagOtherInput, setShowTagOtherInput] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const customFoods = useMemo(() => {
+    return values.foods.filter(
+      (food) => !FOOD_OPTIONS.includes(food as (typeof FOOD_OPTIONS)[number]),
+    );
+  }, [values.foods]);
+  const customTags = useMemo(() => {
+    return values.tags.filter(
+      (tag) => !TAG_OPTIONS.includes(tag as (typeof TAG_OPTIONS)[number]),
+    );
+  }, [values.tags]);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -102,6 +130,10 @@ export function LocationSubmissionForm() {
 
       setValues(DEFAULT_VALUES);
       setTurnstileToken("");
+      setFoodOtherValue("");
+      setTagOtherValue("");
+      setShowFoodOtherInput(false);
+      setShowTagOtherInput(false);
       setSuccess("Submitted. Your location is now pending review.");
       router.refresh();
     } catch (submitError) {
@@ -194,7 +226,89 @@ export function LocationSubmissionForm() {
               <span>{food}</span>
             </label>
           ))}
+          <label className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
+            <input
+              type="checkbox"
+              checked={showFoodOtherInput || customFoods.length > 0}
+              onChange={() => {
+                const currentlyActive = showFoodOtherInput || customFoods.length > 0;
+
+                if (currentlyActive) {
+                  setValues((current) => ({
+                    ...current,
+                    foods: current.foods.filter((food) =>
+                      FOOD_OPTIONS.includes(food as (typeof FOOD_OPTIONS)[number]),
+                    ),
+                  }));
+                  setFoodOtherValue("");
+                  setShowFoodOtherInput(false);
+                  return;
+                }
+
+                setShowFoodOtherInput(true);
+              }}
+            />
+            <span>Other</span>
+          </label>
         </div>
+        {showFoodOtherInput || customFoods.length > 0 ? (
+          <div className="space-y-2 rounded-md border border-dashed p-3">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                value={foodOtherValue}
+                onChange={(event) => setFoodOtherValue(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  setValues((current) => ({
+                    ...current,
+                    foods: addCustomValue(current.foods, foodOtherValue),
+                  }));
+                  setFoodOtherValue("");
+                }}
+                placeholder="Add custom food"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setValues((current) => ({
+                    ...current,
+                    foods: addCustomValue(current.foods, foodOtherValue),
+                  }));
+                  setFoodOtherValue("");
+                }}
+              >
+                Add
+              </Button>
+            </div>
+            {customFoods.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {customFoods.map((food) => (
+                  <label
+                    key={food}
+                    className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked
+                      onChange={() =>
+                        setValues((current) => ({
+                          ...current,
+                          foods: current.foods.filter((item) => item !== food),
+                        }))
+                      }
+                    />
+                    <span>{food}</span>
+                  </label>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-2">
@@ -218,7 +332,89 @@ export function LocationSubmissionForm() {
               <span>{tag}</span>
             </label>
           ))}
+          <label className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm">
+            <input
+              type="checkbox"
+              checked={showTagOtherInput || customTags.length > 0}
+              onChange={() => {
+                const currentlyActive = showTagOtherInput || customTags.length > 0;
+
+                if (currentlyActive) {
+                  setValues((current) => ({
+                    ...current,
+                    tags: current.tags.filter((tag) =>
+                      TAG_OPTIONS.includes(tag as (typeof TAG_OPTIONS)[number]),
+                    ),
+                  }));
+                  setTagOtherValue("");
+                  setShowTagOtherInput(false);
+                  return;
+                }
+
+                setShowTagOtherInput(true);
+              }}
+            />
+            <span>Other</span>
+          </label>
         </div>
+        {showTagOtherInput || customTags.length > 0 ? (
+          <div className="space-y-2 rounded-md border border-dashed p-3">
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Input
+                value={tagOtherValue}
+                onChange={(event) => setTagOtherValue(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter") {
+                    return;
+                  }
+
+                  event.preventDefault();
+                  setValues((current) => ({
+                    ...current,
+                    tags: addCustomValue(current.tags, tagOtherValue),
+                  }));
+                  setTagOtherValue("");
+                }}
+                placeholder="Add custom tag"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setValues((current) => ({
+                    ...current,
+                    tags: addCustomValue(current.tags, tagOtherValue),
+                  }));
+                  setTagOtherValue("");
+                }}
+              >
+                Add
+              </Button>
+            </div>
+            {customTags.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {customTags.map((tag) => (
+                  <label
+                    key={tag}
+                    className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked
+                      onChange={() =>
+                        setValues((current) => ({
+                          ...current,
+                          tags: current.tags.filter((item) => item !== tag),
+                        }))
+                      }
+                    />
+                    <span>{tag}</span>
+                  </label>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className="space-y-2">

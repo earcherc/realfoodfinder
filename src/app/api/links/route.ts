@@ -5,6 +5,7 @@ import {
   linkSubmissionSchema,
   listApprovedLinks,
 } from "@/lib/link-repository";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export async function GET() {
   const links = await listApprovedLinks();
@@ -14,6 +15,18 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const token =
+      typeof body.turnstileToken === "string" ? body.turnstileToken : "";
+    const remoteIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const captcha = await verifyTurnstileToken({ token, remoteIp });
+
+    if (!captcha.ok) {
+      return NextResponse.json(
+        { message: captcha.message ?? "Captcha verification failed." },
+        { status: 400 },
+      );
+    }
+
     const payload = linkSubmissionSchema.parse(body);
     const created = await createLinkSubmission(payload);
 

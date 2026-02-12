@@ -32,6 +32,8 @@ cp .env.example .env.local
 - `GITHUB_FEEDBACK_REPO`: repository name for feedback issues.
 - `GITHUB_FEEDBACK_TOKEN`: GitHub token used by `/api/feedback`.
 - `GITHUB_FEEDBACK_LABELS`: optional comma-separated issue labels.
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: Cloudflare Turnstile site key (public).
+- `TURNSTILE_SECRET_KEY`: Cloudflare Turnstile secret key (server-only).
 
 4. Start local Postgres:
 
@@ -87,3 +89,11 @@ pnpm db:local:psql
    - `GITHUB_FEEDBACK_REPO`
    - `GITHUB_FEEDBACK_TOKEN`
    - `GITHUB_FEEDBACK_LABELS` (optional, e.g. `feedback,from-site`)
+
+## Captcha Setup
+
+1. Create a Cloudflare Turnstile widget (Managed or Non-interactive mode).
+2. Add these env vars in Vercel:
+   - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+   - `TURNSTILE_SECRET_KEY`
+3. Add the same values in local `.env.local` when testing submissions locally.

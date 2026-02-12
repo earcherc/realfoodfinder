@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
+import Turnstile from "react-turnstile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,7 +51,9 @@ function toggleArrayValue(list: string[], value: string) {
 
 export function LocationSubmissionForm() {
   const router = useRouter();
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [values, setValues] = useState<FormValues>(DEFAULT_VALUES);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -62,12 +65,19 @@ export function LocationSubmissionForm() {
     setIsSaving(true);
 
     try {
+      if (turnstileSiteKey && !turnstileToken) {
+        throw new Error("Please complete captcha verification.");
+      }
+
       const response = await fetch("/api/locations", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify({
+          ...values,
+          turnstileToken,
+        }),
       });
 
       if (!response.ok) {
@@ -76,6 +86,7 @@ export function LocationSubmissionForm() {
       }
 
       setValues(DEFAULT_VALUES);
+      setTurnstileToken("");
       setSuccess("Submitted. Your location is now pending review.");
       router.refresh();
     } catch (submitError) {
@@ -247,7 +258,24 @@ export function LocationSubmissionForm() {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
 
-      <Button type="submit" disabled={isSaving} className="w-full">
+      {turnstileSiteKey ? (
+        <div className="pt-1">
+          <Turnstile
+            sitekey={turnstileSiteKey}
+            onVerify={(token) => setTurnstileToken(token)}
+            onExpire={() => setTurnstileToken("")}
+            onError={() => setTurnstileToken("")}
+            theme="light"
+            size="flexible"
+          />
+        </div>
+      ) : null}
+
+      <Button
+        type="submit"
+        disabled={isSaving || (Boolean(turnstileSiteKey) && !turnstileToken)}
+        className="w-full"
+      >
         {isSaving ? (
           <span className="inline-flex items-center gap-2">
             <LoaderCircle className="size-4 animate-spin" />

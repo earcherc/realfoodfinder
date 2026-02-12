@@ -116,7 +116,7 @@ export function LocationMap({ locations }: LocationMapProps) {
 
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Food filter (AND)
+            Food filter
           </p>
           <div className="flex flex-wrap gap-2">
             {FOOD_OPTIONS.map((food) => {
@@ -145,7 +145,7 @@ export function LocationMap({ locations }: LocationMapProps) {
 
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Tag filter (AND)
+            Tag filter
           </p>
           <div className="flex flex-wrap gap-2">
             {TAG_OPTIONS.map((tag) => {

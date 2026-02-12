@@ -13,8 +13,8 @@ export function LocationCard({ location, className }: LocationCardProps) {
   const typeMeta = getLocationTypeMeta(location.type);
 
   return (
-    <Card className={cn("h-full", className)}>
-      <CardHeader className="space-y-3">
+    <Card className={cn("h-full gap-4", className)}>
+      <CardHeader className="space-y-2">
         <div className="flex items-start justify-between gap-3">
           <CardTitle className="text-base">{location.name}</CardTitle>
           <Badge className={typeMeta?.tone}>{typeMeta?.label}</Badge>

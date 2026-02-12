@@ -3,11 +3,8 @@ import { Globe } from "lucide-react";
 import { LocationCard } from "@/components/location-card";
 import { LocationMap } from "@/components/location-map";
 import { SiteHeader } from "@/components/site-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { listApprovedLocations } from "@/lib/location-repository";
-import { LOCATION_TYPES } from "@/lib/location-types";
 
 export const dynamic = "force-dynamic";
 
@@ -35,22 +32,10 @@ export default async function Home() {
         </section>
 
         <section>
-          <Card className="border-emerald-100 shadow-sm">
-            <CardContent>
-              <LocationMap locations={locations} />
-            </CardContent>
-          </Card>
+          <LocationMap locations={locations} />
         </section>
 
         <section className="space-y-4">
-          <div className="flex flex-wrap gap-2">
-            {LOCATION_TYPES.map((item) => (
-              <Badge key={item.value} className={item.tone}>
-                {item.label}
-              </Badge>
-            ))}
-          </div>
-
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-2xl font-semibold tracking-tight">
               Recently approved

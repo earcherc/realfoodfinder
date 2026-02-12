@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { MessageSquareWarning } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -83,9 +83,9 @@ export function FeedbackDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="ghost">
-          <MessageSquareWarning className="size-4" />
-          Feedback
+        <Button variant="ghost" size="icon" aria-label="Open feedback dialog">
+          <MessageCircle className="size-4" />
+          <span className="sr-only">Feedback</span>
         </Button>
       </DialogTrigger>
       <DialogContent>

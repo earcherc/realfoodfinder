@@ -91,6 +91,7 @@ export function LinkSubmissionForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const isSubmitted = Boolean(success);
 
   const productBaseOptions = useMemo(() => {
     return LINK_PRODUCT_OPTIONS.filter((item) => item !== "Other");
@@ -523,7 +524,7 @@ export function LinkSubmissionForm() {
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
+      
 
       {turnstileSiteKey ? (
         <div className="pt-1">
@@ -552,16 +553,23 @@ export function LinkSubmissionForm() {
         type="submit"
         disabled={
           isSaving ||
+          isSubmitted ||
           !canSubmit ||
           (Boolean(turnstileSiteKey) && !turnstileToken)
         }
-        className="w-full"
+        className={cn(
+          "w-full",
+          isSubmitted &&
+            "bg-emerald-700 text-white hover:bg-emerald-700 disabled:opacity-100",
+        )}
       >
         {isSaving ? (
           <span className="inline-flex items-center gap-2">
             <LoaderCircle className="size-4 animate-spin" />
             Submitting...
           </span>
+        ) : isSubmitted ? (
+          "Submitted for review"
         ) : (
           "Submit link"
         )}

@@ -20,6 +20,7 @@ import {
   LOCATION_TYPES,
   TAG_OPTIONS,
 } from "@/lib/location-types";
+import { cn } from "@/lib/utils";
 
 type FormValues = {
   name: string;
@@ -90,6 +91,7 @@ export function LocationSubmissionForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const isSubmitted = Boolean(success);
   const customFoods = useMemo(() => {
     return values.foods.filter(
       (food) => !FOOD_OPTIONS.includes(food as (typeof FOOD_OPTIONS)[number]),
@@ -467,7 +469,7 @@ export function LocationSubmissionForm() {
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {success ? <p className="text-sm text-emerald-700">{success}</p> : null}
+      
 
       {turnstileSiteKey ? (
         <div className="pt-1">
@@ -494,14 +496,24 @@ export function LocationSubmissionForm() {
 
       <Button
         type="submit"
-        disabled={isSaving || (Boolean(turnstileSiteKey) && !turnstileToken)}
-        className="w-full"
+        disabled={
+          isSaving ||
+          isSubmitted ||
+          (Boolean(turnstileSiteKey) && !turnstileToken)
+        }
+        className={cn(
+          "w-full",
+          isSubmitted &&
+            "bg-emerald-700 text-white hover:bg-emerald-700 disabled:opacity-100",
+        )}
       >
         {isSaving ? (
           <span className="inline-flex items-center gap-2">
             <LoaderCircle className="size-4 animate-spin" />
             Submitting...
           </span>
+        ) : isSubmitted ? (
+          "Submitted for review"
         ) : (
           "Submit location"
         )}

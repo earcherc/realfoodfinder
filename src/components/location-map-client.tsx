@@ -48,6 +48,7 @@ export default function LocationMapClient({ locations }: LocationMapClientProps)
       home: buildMarkerIcon("marker-home"),
       store: buildMarkerIcon("marker-store"),
       dropoff: buildMarkerIcon("marker-dropoff"),
+      other: buildMarkerIcon("marker-other"),
     };
   }, []);
 
@@ -80,6 +81,14 @@ export default function LocationMapClient({ locations }: LocationMapClientProps)
                 {location.description ? (
                   <p className="text-xs text-muted-foreground">
                     {location.description}
+                  </p>
+                ) : null}
+                {location.address ? (
+                  <p className="text-xs text-muted-foreground">{location.address}</p>
+                ) : null}
+                {location.foods.length > 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    Food: {location.foods.join(", ")}
                   </p>
                 ) : null}
               </div>

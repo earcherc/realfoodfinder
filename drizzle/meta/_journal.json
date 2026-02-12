@@ -8,6 +8,13 @@
       "when": 1770880625414,
       "tag": "0000_steady_namora",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770888870060,
+      "tag": "0001_aspiring_barracuda",
+      "breakpoints": true
     }
   ]
 }

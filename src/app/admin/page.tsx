@@ -102,9 +102,24 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                       <TableCell className="min-w-[220px]">
                         <div className="space-y-1">
                           <p className="font-medium">{location.name}</p>
+                          {location.address ? (
+                            <p className="text-xs text-muted-foreground">
+                              {location.address}
+                            </p>
+                          ) : null}
                           {location.description ? (
                             <p className="text-xs text-muted-foreground">
                               {location.description}
+                            </p>
+                          ) : null}
+                          {location.foods.length > 0 ? (
+                            <p className="text-xs text-muted-foreground">
+                              Food: {location.foods.join(", ")}
+                            </p>
+                          ) : null}
+                          {location.tags.length > 0 ? (
+                            <p className="text-xs text-muted-foreground">
+                              Tags: {location.tags.join(", ")}
                             </p>
                           ) : null}
                         </div>

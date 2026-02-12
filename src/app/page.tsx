@@ -82,8 +82,13 @@ export default async function Home() {
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm text-muted-foreground">
                     <p>{location.description ?? "No description submitted yet."}</p>
-                    {location.country ? <p>Country: {location.country}</p> : null}
-                    {location.address ? <p>Area: {location.address}</p> : null}
+                    {location.address ? <p>Place: {location.address}</p> : null}
+                    {location.foods.length > 0 ? (
+                      <p>Food: {location.foods.join(", ")}</p>
+                    ) : null}
+                    {location.tags.length > 0 ? (
+                      <p>Tags: {location.tags.join(", ")}</p>
+                    ) : null}
                   </CardContent>
                 </Card>
               );

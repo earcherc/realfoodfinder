@@ -4,10 +4,13 @@ import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/db/client";
 import { locations } from "@/db/schema";
+import { geocodeAddress } from "@/lib/geocode";
 import type { LocationRecord } from "@/lib/location-model";
 import {
+  FOOD_OPTIONS,
   LOCATION_STATUS_VALUES,
   LOCATION_TYPE_VALUES,
+  TAG_OPTIONS,
   type LocationStatus,
   type LocationType,
 } from "@/lib/location-types";
@@ -26,21 +29,6 @@ const optionalShortString = z
   .optional()
   .transform((value) => (value && value.length > 0 ? value : undefined));
 
-const optionalAddressString = z
-  .string()
-  .trim()
-  .max(255)
-  .optional()
-  .transform((value) => (value && value.length > 0 ? value : undefined));
-
-const optionalEmailString = z
-  .string()
-  .trim()
-  .email()
-  .max(255)
-  .optional()
-  .transform((value) => (value && value.length > 0 ? value : undefined));
-
 const locationTypeSchema = z.enum(
   LOCATION_TYPE_VALUES as [LocationType, ...LocationType[]],
 );
@@ -49,21 +37,21 @@ const locationStatusSchema = z.enum(
   LOCATION_STATUS_VALUES as [LocationStatus, ...LocationStatus[]],
 );
 
+const foodOptionSchema = z.enum(FOOD_OPTIONS);
+const tagOptionSchema = z.enum(TAG_OPTIONS);
+
 export const locationSubmissionSchema = z.object({
   name: z.string().trim().min(2).max(120),
   type: locationTypeSchema,
   description: optionalString,
-  address: optionalAddressString,
-  country: z
-    .string()
-    .trim()
-    .max(100)
-    .optional()
-    .transform((value) => (value && value.length > 0 ? value : undefined)),
-  latitude: z.coerce.number().min(-90).max(90),
-  longitude: z.coerce.number().min(-180).max(180),
+  address: z.string().trim().min(5).max(255),
+  foods: z
+    .array(foodOptionSchema)
+    .min(1, "Select at least one food item.")
+    .max(16),
+  tags: z.array(tagOptionSchema).max(16).default([]),
   submitterName: optionalShortString,
-  submitterEmail: optionalEmailString,
+  submitterEmail: z.string().trim().email().max(255),
 });
 
 const updateStatusSchema = z.object({
@@ -80,12 +68,14 @@ const localStore: LocationRecord[] = [
     name: "Morning Dew Farm",
     type: "farm",
     description: "Pasture-raised eggs and seasonal vegetables.",
-    address: "Dane County",
-    country: "USA",
+    address: "Dane County, Wisconsin",
+    country: null,
     latitude: 43.1731,
     longitude: -89.4012,
+    foods: ["Eggs", "Vegetables"],
+    tags: ["Pasture-Raised", "No Spray"],
     submitterName: "Seed Data",
-    submitterEmail: null,
+    submitterEmail: "seed@realfoodfinder.local",
     status: "approved",
     createdAt: new Date("2026-01-01T09:30:00.000Z"),
     updatedAt: new Date("2026-01-01T09:30:00.000Z"),
@@ -95,12 +85,14 @@ const localStore: LocationRecord[] = [
     name: "El Bosque Community Drop",
     type: "dropoff",
     description: "Weekly produce pickup from nearby regenerative growers.",
-    address: "San Jose",
-    country: "Costa Rica",
+    address: "San Jose, Costa Rica",
+    country: null,
     latitude: 9.9281,
     longitude: -84.0907,
+    foods: ["Vegetables", "Fruit", "Honey"],
+    tags: ["Organic", "Regenerative"],
     submitterName: "Seed Data",
-    submitterEmail: null,
+    submitterEmail: "seed@realfoodfinder.local",
     status: "approved",
     createdAt: new Date("2026-01-03T11:15:00.000Z"),
     updatedAt: new Date("2026-01-03T11:15:00.000Z"),
@@ -110,12 +102,14 @@ const localStore: LocationRecord[] = [
     name: "Riverfront Whole Foods Collective",
     type: "store",
     description: "Local dairy, grain, and traditional ferments.",
-    address: "Rotterdam",
-    country: "Netherlands",
+    address: "Rotterdam, Netherlands",
+    country: null,
     latitude: 51.9244,
     longitude: 4.4777,
+    foods: ["Milk", "Butter", "Cheese"],
+    tags: ["Unheated", "Unfiltered"],
     submitterName: "Seed Data",
-    submitterEmail: null,
+    submitterEmail: "seed@realfoodfinder.local",
     status: "approved",
     createdAt: new Date("2026-01-08T14:20:00.000Z"),
     updatedAt: new Date("2026-01-08T14:20:00.000Z"),
@@ -131,6 +125,8 @@ function toLocationRecord(value: {
   country: string | null;
   latitude: number;
   longitude: number;
+  foods: string[] | null;
+  tags: string[] | null;
   submitterName: string | null;
   submitterEmail: string | null;
   status: LocationStatus;
@@ -139,6 +135,8 @@ function toLocationRecord(value: {
 }): LocationRecord {
   return {
     ...value,
+    foods: value.foods ?? [],
+    tags: value.tags ?? [],
     createdAt:
       value.createdAt instanceof Date
         ? value.createdAt
@@ -150,14 +148,6 @@ function toLocationRecord(value: {
   };
 }
 
-function isMissingTableError(error: unknown) {
-  if (!error || typeof error !== "object") {
-    return false;
-  }
-
-  return "code" in error && error.code === "42P01";
-}
-
 export async function listApprovedLocations() {
   const db = getDb();
 
@@ -165,21 +155,13 @@ export async function listApprovedLocations() {
     return localStore.filter((location) => location.status === "approved");
   }
 
-  try {
-    const rows = await db
-      .select()
-      .from(locations)
-      .where(eq(locations.status, "approved"))
-      .orderBy(desc(locations.createdAt));
+  const rows = await db
+    .select()
+    .from(locations)
+    .where(eq(locations.status, "approved"))
+    .orderBy(desc(locations.createdAt));
 
-    return rows.map((row) => toLocationRecord(row as LocationRecord));
-  } catch (error) {
-    if (isMissingTableError(error)) {
-      return [];
-    }
-
-    throw error;
-  }
+  return rows.map((row) => toLocationRecord(row as LocationRecord));
 }
 
 export async function listAllLocations() {
@@ -191,25 +173,22 @@ export async function listAllLocations() {
     );
   }
 
-  try {
-    const rows = await db
-      .select()
-      .from(locations)
-      .orderBy(desc(locations.createdAt));
+  const rows = await db.select().from(locations).orderBy(desc(locations.createdAt));
 
-    return rows.map((row) => toLocationRecord(row as LocationRecord));
-  } catch (error) {
-    if (isMissingTableError(error)) {
-      return [];
-    }
-
-    throw error;
-  }
+  return rows.map((row) => toLocationRecord(row as LocationRecord));
 }
 
 export async function createLocationSubmission(input: LocationSubmissionInput) {
   const parsed = locationSubmissionSchema.parse(input);
   const db = getDb();
+
+  const coordinates = await geocodeAddress(parsed.address);
+
+  if (!coordinates) {
+    throw new Error(
+      "Could not locate this place. Try a more specific street address or place name.",
+    );
+  }
 
   if (!db) {
     const now = new Date();
@@ -219,12 +198,14 @@ export async function createLocationSubmission(input: LocationSubmissionInput) {
       name: parsed.name,
       type: parsed.type,
       description: parsed.description ?? null,
-      address: parsed.address ?? null,
-      country: parsed.country ?? null,
-      latitude: parsed.latitude,
-      longitude: parsed.longitude,
+      address: parsed.address,
+      country: null,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      foods: parsed.foods,
+      tags: parsed.tags,
       submitterName: parsed.submitterName ?? null,
-      submitterEmail: parsed.submitterEmail ?? null,
+      submitterEmail: parsed.submitterEmail,
       status: "pending",
       createdAt: now,
       updatedAt: now,
@@ -243,9 +224,10 @@ export async function createLocationSubmission(input: LocationSubmissionInput) {
       type: parsed.type,
       description: parsed.description,
       address: parsed.address,
-      country: parsed.country,
-      latitude: parsed.latitude,
-      longitude: parsed.longitude,
+      latitude: coordinates.latitude,
+      longitude: coordinates.longitude,
+      foods: parsed.foods,
+      tags: parsed.tags,
       submitterName: parsed.submitterName,
       submitterEmail: parsed.submitterEmail,
       status: "pending",

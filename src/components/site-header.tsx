@@ -35,9 +35,6 @@ export function SiteHeader() {
           <Button asChild>
             <Link href="/submit">Submit Location</Link>
           </Button>
-          <Button variant={isCurrent(pathname, "/admin") ? "secondary" : "ghost"} asChild>
-            <Link href="/admin">Admin</Link>
-          </Button>
         </nav>
       </div>
     </header>

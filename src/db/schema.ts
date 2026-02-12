@@ -7,12 +7,14 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const locationTypeEnum = pgEnum("location_type", [
   "farm",
   "home",
   "store",
   "dropoff",
+  "other",
 ]);
 
 export const locationStatusEnum = pgEnum("location_status", [
@@ -30,6 +32,14 @@ export const locations = pgTable("locations", {
   country: varchar("country", { length: 100 }),
   latitude: doublePrecision("latitude").notNull(),
   longitude: doublePrecision("longitude").notNull(),
+  foods: text("foods")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  tags: text("tags")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
   submitterName: varchar("submitter_name", { length: 120 }),
   submitterEmail: varchar("submitter_email", { length: 255 }),
   status: locationStatusEnum("status").notNull().default("pending"),

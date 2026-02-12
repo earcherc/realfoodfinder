@@ -156,4 +156,8 @@
   .marker-dropoff {
     background: #6d28d9;
   }
+
+  .marker-other {
+    background: #334155;
+  }
 }

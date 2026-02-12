@@ -49,8 +49,13 @@ export default async function LocationsPage() {
                       Coordinates: {location.latitude.toFixed(4)},{" "}
                       {location.longitude.toFixed(4)}
                     </p>
-                    {location.country ? <p>Country: {location.country}</p> : null}
-                    {location.address ? <p>Area: {location.address}</p> : null}
+                    {location.address ? <p>Place: {location.address}</p> : null}
+                    {location.foods.length > 0 ? (
+                      <p>Food: {location.foods.join(", ")}</p>
+                    ) : null}
+                    {location.tags.length > 0 ? (
+                      <p>Tags: {location.tags.join(", ")}</p>
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>

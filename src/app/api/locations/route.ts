@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 import {
   createLocationSubmission,
   listApprovedLocations,
@@ -25,6 +26,17 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof ZodError) {
+      const issue = error.issues[0];
+
+      return NextResponse.json(
+        {
+          message: issue?.message ?? "Invalid form fields.",
+        },
+        { status: 400 },
+      );
+    }
+
     return NextResponse.json(
       {
         message:

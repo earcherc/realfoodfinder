@@ -14,16 +14,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { LOCATION_TYPES } from "@/lib/location-types";
+import {
+  FOOD_OPTIONS,
+  LOCATION_TYPES,
+  TAG_OPTIONS,
+} from "@/lib/location-types";
 
 type FormValues = {
   name: string;
   type: (typeof LOCATION_TYPES)[number]["value"];
-  description: string;
   address: string;
-  country: string;
-  latitude: string;
-  longitude: string;
+  description: string;
+  foods: string[];
+  tags: string[];
   submitterName: string;
   submitterEmail: string;
 };
@@ -31,14 +34,19 @@ type FormValues = {
 const DEFAULT_VALUES: FormValues = {
   name: "",
   type: "farm",
-  description: "",
   address: "",
-  country: "",
-  latitude: "",
-  longitude: "",
+  description: "",
+  foods: [],
+  tags: [],
   submitterName: "",
   submitterEmail: "",
 };
+
+function toggleArrayValue(list: string[], value: string) {
+  return list.includes(value)
+    ? list.filter((item) => item !== value)
+    : [...list, value];
+}
 
 export function LocationSubmissionForm() {
   const router = useRouter();
@@ -59,11 +67,7 @@ export function LocationSubmissionForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...values,
-          latitude: Number(values.latitude),
-          longitude: Number(values.longitude),
-        }),
+        body: JSON.stringify(values),
       });
 
       if (!response.ok) {
@@ -86,9 +90,9 @@ export function LocationSubmissionForm() {
   }
 
   return (
-    <form className="space-y-4" onSubmit={onSubmit}>
+    <form className="space-y-5" onSubmit={onSubmit}>
       <div className="space-y-2">
-        <Label htmlFor="location-name">Name</Label>
+        <Label htmlFor="location-name">Location name</Label>
         <Input
           id="location-name"
           required
@@ -124,46 +128,70 @@ export function LocationSubmissionForm() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="location-latitude">Latitude</Label>
-          <Input
-            id="location-latitude"
-            required
-            type="number"
-            inputMode="decimal"
-            step="any"
-            min={-90}
-            max={90}
-            value={values.latitude}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                latitude: event.target.value,
-              }))
-            }
-            placeholder="40.7128"
-          />
+      <div className="space-y-2">
+        <Label htmlFor="location-address">Street address or place name</Label>
+        <Input
+          id="location-address"
+          required
+          value={values.address}
+          onChange={(event) =>
+            setValues((current) => ({
+              ...current,
+              address: event.target.value,
+            }))
+          }
+          placeholder="123 Main St, Austin TX or Sunrise Organic Market"
+        />
+        <p className="text-xs text-muted-foreground">
+          We geocode this automatically to place the marker on the map.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Food available</Label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {FOOD_OPTIONS.map((food) => (
+            <label
+              key={food}
+              className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                checked={values.foods.includes(food)}
+                onChange={() =>
+                  setValues((current) => ({
+                    ...current,
+                    foods: toggleArrayValue(current.foods, food),
+                  }))
+                }
+              />
+              <span>{food}</span>
+            </label>
+          ))}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="location-longitude">Longitude</Label>
-          <Input
-            id="location-longitude"
-            required
-            type="number"
-            inputMode="decimal"
-            step="any"
-            min={-180}
-            max={180}
-            value={values.longitude}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                longitude: event.target.value,
-              }))
-            }
-            placeholder="-74.0060"
-          />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Tags</Label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {TAG_OPTIONS.map((tag) => (
+            <label
+              key={tag}
+              className="flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm"
+            >
+              <input
+                type="checkbox"
+                checked={values.tags.includes(tag)}
+                onChange={() =>
+                  setValues((current) => ({
+                    ...current,
+                    tags: toggleArrayValue(current.tags, tag),
+                  }))
+                }
+              />
+              <span>{tag}</span>
+            </label>
+          ))}
         </div>
       </div>
 
@@ -178,45 +206,14 @@ export function LocationSubmissionForm() {
               description: event.target.value,
             }))
           }
-          placeholder="What food is available and how people can source it."
-          rows={4}
+          placeholder="Share pickup times, sourcing details, and contact expectations."
+          rows={7}
         />
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="location-address">Address / Area</Label>
-          <Input
-            id="location-address"
-            value={values.address}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                address: event.target.value,
-              }))
-            }
-            placeholder="City, neighborhood, or pickup point"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="location-country">Country</Label>
-          <Input
-            id="location-country"
-            value={values.country}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                country: event.target.value,
-              }))
-            }
-            placeholder="United States"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="submitter-name">Your Name (optional)</Label>
+          <Label htmlFor="submitter-name">Your name (optional)</Label>
           <Input
             id="submitter-name"
             value={values.submitterName}
@@ -230,9 +227,10 @@ export function LocationSubmissionForm() {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="submitter-email">Your Email (optional)</Label>
+          <Label htmlFor="submitter-email">Your email</Label>
           <Input
             id="submitter-email"
+            required
             type="email"
             value={values.submitterEmail}
             onChange={(event) =>

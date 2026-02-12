@@ -9,6 +9,8 @@ export type LocationRecord = {
   country: string | null;
   latitude: number;
   longitude: number;
+  foods: string[];
+  tags: string[];
   submitterName: string | null;
   submitterEmail: string | null;
   status: LocationStatus;

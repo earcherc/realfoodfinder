@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Globe, MapPinned } from "lucide-react";
+import { LocationCard } from "@/components/location-card";
 import { LocationMap } from "@/components/location-map";
 import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listApprovedLocations } from "@/lib/location-repository";
-import { LOCATION_TYPES, getLocationTypeMeta } from "@/lib/location-types";
+import { LOCATION_TYPES } from "@/lib/location-types";
 
 export const dynamic = "force-dynamic";
 
@@ -24,13 +25,9 @@ export default async function Home() {
             Global sourcing network for real food
           </div>
           <div className="max-w-4xl space-y-4">
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
-              Connect farmers, homes, stores, and drop points around the world.
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
+              Connecting people to real food around the world
             </h1>
-            <p className="text-sm text-muted-foreground sm:text-base">
-              Real Food Finder maps where real food is available, so buyers can
-              source directly and communities can organize resilient local supply.
-            </p>
           </div>
         </section>
 
@@ -66,33 +63,15 @@ export default async function Home() {
             </Button>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {locations.slice(0, 6).map((location) => {
-              const typeMeta = getLocationTypeMeta(location.type);
-
-              return (
-                <Card key={location.id} className="border-border/70">
-                  <CardHeader className="space-y-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <CardTitle className="text-base">{location.name}</CardTitle>
-                      <Badge className={typeMeta?.tone}>{typeMeta?.label}</Badge>
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm text-muted-foreground">
-                    <p>{location.description ?? "No description submitted yet."}</p>
-                    {location.address ? <p>Place: {location.address}</p> : null}
-                    {location.foods.length > 0 ? (
-                      <p>Food: {location.foods.join(", ")}</p>
-                    ) : null}
-                    {location.tags.length > 0 ? (
-                      <p>Tags: {location.tags.join(", ")}</p>
-                    ) : null}
-                  </CardContent>
-                </Card>
-              );
-            })}
+            {locations
+              .slice(0, 6)
+              .map((location) => (
+                <LocationCard
+                  key={location.id}
+                  location={location}
+                  className="border-border/70"
+                />
+              ))}
           </div>
         </section>
       </main>

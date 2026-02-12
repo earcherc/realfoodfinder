@@ -34,6 +34,8 @@ cp .env.example .env.local
 - `GITHUB_FEEDBACK_LABELS`: optional comma-separated issue labels.
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`: Cloudflare Turnstile site key (public).
 - `TURNSTILE_SECRET_KEY`: Cloudflare Turnstile secret key (server-only).
+- `TURNSTILE_EXPECTED_HOSTNAMES`: optional comma-separated hostname allowlist
+  (for example: `realfoodfinder.com,www.realfoodfinder.com`).
 
 4. Start local Postgres:
 
@@ -96,4 +98,9 @@ pnpm db:local:psql
 2. Add these env vars in Vercel:
    - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
    - `TURNSTILE_SECRET_KEY`
+   - `TURNSTILE_EXPECTED_HOSTNAMES` (optional but recommended)
 3. Add the same values in local `.env.local` when testing submissions locally.
+4. In Cloudflare Turnstile widget settings, ensure hostname allowlist includes:
+   - `realfoodfinder.com`
+   - `www.realfoodfinder.com`
+   - your Vercel preview domain(s), if you test Preview deployments

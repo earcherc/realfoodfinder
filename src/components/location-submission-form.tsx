@@ -262,11 +262,21 @@ export function LocationSubmissionForm() {
         <div className="pt-1">
           <Turnstile
             sitekey={turnstileSiteKey}
-            onVerify={(token) => setTurnstileToken(token)}
-            onExpire={() => setTurnstileToken("")}
-            onError={() => setTurnstileToken("")}
+            action="submit_location"
+            onVerify={(token) => {
+              setTurnstileToken(token);
+            }}
+            onExpire={() => {
+              setTurnstileToken("");
+              setError("Captcha expired. Please verify again.");
+            }}
+            onError={() => {
+              setTurnstileToken("");
+              setError("Captcha failed to load. Please refresh and try again.");
+            }}
             theme="light"
             size="flexible"
+            refreshExpired="auto"
           />
         </div>
       ) : null}

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FeedbackDialog } from "@/components/feedback-dialog";
@@ -19,9 +20,7 @@ export function SiteHeader() {
           href="/"
           className="inline-flex items-center gap-2 text-sm font-semibold tracking-wide"
         >
-          <span aria-hidden className="text-base leading-none">
-            🥩
-          </span>
+          <Image src="/steak.svg" alt="" aria-hidden width={16} height={16} />
           <span>Real Food Finder</span>
         </Link>
         <nav className="flex flex-nowrap items-center gap-2">

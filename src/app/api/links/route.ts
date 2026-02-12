@@ -17,8 +17,14 @@ export async function POST(request: Request) {
     const body = await request.json();
     const token =
       typeof body.turnstileToken === "string" ? body.turnstileToken : "";
-    const remoteIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-    const captcha = await verifyTurnstileToken({ token, remoteIp });
+    const remoteIp =
+      request.headers.get("cf-connecting-ip") ??
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const captcha = await verifyTurnstileToken({
+      token,
+      remoteIp,
+      expectedAction: "submit_link",
+    });
 
     if (!captcha.ok) {
       return NextResponse.json(

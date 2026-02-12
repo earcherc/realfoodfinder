@@ -83,7 +83,7 @@ export function FeedbackDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Open feedback dialog">
+        <Button variant="ghost" size="icon-sm" aria-label="Open feedback dialog">
           <MessageCircle className="size-4" />
           <span className="sr-only">Feedback</span>
         </Button>

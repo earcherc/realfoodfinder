@@ -23,18 +23,26 @@ export function SiteHeader() {
           <Leaf className="size-4 text-emerald-700" />
           Real Food Finder
         </Link>
-        <nav className="flex flex-wrap items-center gap-2">
-          <Button variant={isCurrent(pathname, "/") ? "secondary" : "ghost"} asChild>
+        <nav className="flex flex-nowrap items-center gap-1 sm:gap-2">
+          <Button
+            size="sm"
+            variant={isCurrent(pathname, "/") ? "secondary" : "ghost"}
+            asChild
+          >
             <Link href="/">Map</Link>
           </Button>
           <Button
+            size="sm"
             variant={isCurrent(pathname, "/locations") ? "secondary" : "ghost"}
             asChild
           >
             <Link href="/locations">Locations</Link>
           </Button>
-          <Button asChild>
-            <Link href="/submit">Submit Location</Link>
+          <Button size="sm" asChild>
+            <Link href="/submit">
+              <span className="sm:hidden">Submit</span>
+              <span className="hidden sm:inline">Submit Location</span>
+            </Link>
           </Button>
           <FeedbackDialog />
         </nav>

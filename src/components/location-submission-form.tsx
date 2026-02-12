@@ -49,6 +49,21 @@ function toggleArrayValue(list: string[], value: string) {
     : [...list, value];
 }
 
+function turnstileErrorMessage(error: unknown) {
+  const code =
+    typeof error === "string"
+      ? error
+      : typeof error === "number"
+        ? String(error)
+        : "";
+
+  if (code === "110200") {
+    return "Captcha is not enabled for this domain yet (110200).";
+  }
+
+  return "Captcha failed to load. Please refresh and try again.";
+}
+
 export function LocationSubmissionForm() {
   const router = useRouter();
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
@@ -270,9 +285,9 @@ export function LocationSubmissionForm() {
               setTurnstileToken("");
               setError("Captcha expired. Please verify again.");
             }}
-            onError={() => {
+            onError={(turnstileError) => {
               setTurnstileToken("");
-              setError("Captcha failed to load. Please refresh and try again.");
+              setError(turnstileErrorMessage(turnstileError));
             }}
             theme="light"
             size="flexible"

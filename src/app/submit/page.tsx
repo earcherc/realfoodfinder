@@ -1,7 +1,5 @@
-import { MapPinPlus } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
-import { LocationSubmissionForm } from "@/components/location-submission-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SubmitWizard } from "@/components/submit-wizard";
 
 export default function SubmitPage() {
   return (
@@ -11,25 +9,15 @@ export default function SubmitPage() {
       <main className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
         <section className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Submit a location
+            Submit
           </h1>
           <p className="text-sm text-muted-foreground sm:text-base">
-            Share farms, homes, stores, and drop points to help people source real
-            food nearby. Submissions are reviewed before publishing to the map.
+            Choose how you want to contribute: a physical location or an online link.
+            Submissions are reviewed before publishing.
           </p>
         </section>
 
-        <Card className="border-emerald-100 shadow-sm">
-          <CardHeader>
-            <CardTitle className="inline-flex items-center gap-2">
-              <MapPinPlus className="size-4 text-emerald-700" />
-              Location details
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <LocationSubmissionForm />
-          </CardContent>
-        </Card>
+        <SubmitWizard />
       </main>
     </div>
   );

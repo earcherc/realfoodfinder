@@ -15,6 +15,13 @@
       "when": 1770888870060,
       "tag": "0001_aspiring_barracuda",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770893728076,
+      "tag": "0002_numerous_corsair",
+      "breakpoints": true
     }
   ]
 }

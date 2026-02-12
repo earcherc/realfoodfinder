@@ -36,11 +36,15 @@ export function SiteHeader() {
           >
             <Link href="/locations">Locations</Link>
           </Button>
+          <Button
+            size="sm"
+            variant={isCurrent(pathname, "/links") ? "secondary" : "ghost"}
+            asChild
+          >
+            <Link href="/links">Links</Link>
+          </Button>
           <Button size="sm" asChild>
-            <Link href="/submit">
-              <span className="sm:hidden">Submit</span>
-              <span className="hidden sm:inline">Submit Location</span>
-            </Link>
+            <Link href="/submit">Submit</Link>
           </Button>
           <FeedbackDialog />
         </nav>

@@ -1,0 +1,47 @@
+import { NextResponse } from "next/server";
+import { ZodError } from "zod";
+import {
+  createLinkSubmission,
+  linkSubmissionSchema,
+  listApprovedLinks,
+} from "@/lib/link-repository";
+
+export async function GET() {
+  const links = await listApprovedLinks();
+  return NextResponse.json({ data: links });
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const payload = linkSubmissionSchema.parse(body);
+    const created = await createLinkSubmission(payload);
+
+    return NextResponse.json(
+      {
+        message: "Link submitted for review.",
+        data: created,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          message: error.issues[0]?.message ?? "Invalid form fields.",
+        },
+        { status: 400 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Could not submit link. Please try again.",
+      },
+      { status: 400 },
+    );
+  }
+}

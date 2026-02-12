@@ -62,8 +62,10 @@ pnpm db:local:psql
 
 - `/`: map-first landing page.
 - `/locations`: approved location listing with details.
-- `/submit`: public location submission page.
+- `/links`: approved online source links with country filters.
+- `/submit`: location/link submission wizard.
 - `/admin`: moderation dashboard (approve/reject).
+- `/api/links`: location-independent link submissions.
 - `/api/feedback`: create GitHub issue from feedback dialog.
 
 ## Notes

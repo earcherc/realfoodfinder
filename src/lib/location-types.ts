@@ -43,6 +43,13 @@ export const TAG_OPTIONS = [
   "Regenerative",
 ] as const;
 
+export const LINK_PRODUCT_OPTIONS = [
+  "Water",
+  "Honey",
+  "Clay",
+  "Other",
+] as const;
+
 export function getLocationTypeMeta(type: LocationType) {
   return LOCATION_TYPES.find((item) => item.value === type);
 }

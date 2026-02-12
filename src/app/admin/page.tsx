@@ -11,7 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { updateLocationStatusAction } from "@/app/admin/actions";
+import { updateLinkStatusAction, updateLocationStatusAction } from "@/app/admin/actions";
+import { listAllLinks } from "@/lib/link-repository";
 import { listAllLocations } from "@/lib/location-repository";
 import { getLocationStatusMeta, getLocationTypeMeta } from "@/lib/location-types";
 
@@ -70,6 +71,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   }
 
   const locations = await listAllLocations();
+  const links = await listAllLinks();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_20%_0%,#ddfbe8_0%,#f7f8f4_38%,#ffffff_100%)]">
@@ -149,6 +151,88 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                           <form action={updateLocationStatusAction}>
                             <input type="hidden" name="adminKey" value={key} />
                             <input type="hidden" name="id" value={location.id} />
+                            <input type="hidden" name="status" value="rejected" />
+                            <Button type="submit" size="sm" variant="outline">
+                              Reject
+                            </Button>
+                          </form>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Link moderation</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Country</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Submitted</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {links.map((link) => {
+                  const statusMeta = getLocationStatusMeta(link.status);
+
+                  return (
+                    <TableRow key={link.id}>
+                      <TableCell className="min-w-[260px]">
+                        <div className="space-y-1">
+                          <p className="font-medium">{link.title}</p>
+                          <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-muted-foreground underline"
+                          >
+                            {link.url}
+                          </a>
+                          {link.description ? (
+                            <p className="text-xs text-muted-foreground">
+                              {link.description}
+                            </p>
+                          ) : null}
+                          {link.products.length > 0 ? (
+                            <p className="text-xs text-muted-foreground">
+                              Products: {link.products.join(", ")}
+                            </p>
+                          ) : null}
+                          {link.tags.length > 0 ? (
+                            <p className="text-xs text-muted-foreground">
+                              Tags: {link.tags.join(", ")}
+                            </p>
+                          ) : null}
+                        </div>
+                      </TableCell>
+                      <TableCell>{link.country}</TableCell>
+                      <TableCell>
+                        <Badge className={statusMeta?.tone}>{statusMeta?.label}</Badge>
+                      </TableCell>
+                      <TableCell>{formatDate(link.createdAt)}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <form action={updateLinkStatusAction}>
+                            <input type="hidden" name="adminKey" value={key} />
+                            <input type="hidden" name="id" value={link.id} />
+                            <input type="hidden" name="status" value="approved" />
+                            <Button type="submit" size="sm" variant="secondary">
+                              Approve
+                            </Button>
+                          </form>
+                          <form action={updateLinkStatusAction}>
+                            <input type="hidden" name="adminKey" value={key} />
+                            <input type="hidden" name="id" value={link.id} />
                             <input type="hidden" name="status" value="rejected" />
                             <Button type="submit" size="sm" variant="outline">
                               Reject

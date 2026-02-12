@@ -150,6 +150,14 @@ function toLocationRecord(value: {
   };
 }
 
+function isMissingTableError(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  return "code" in error && error.code === "42P01";
+}
+
 export async function listApprovedLocations() {
   const db = getDb();
 
@@ -157,13 +165,21 @@ export async function listApprovedLocations() {
     return localStore.filter((location) => location.status === "approved");
   }
 
-  const rows = await db
-    .select()
-    .from(locations)
-    .where(eq(locations.status, "approved"))
-    .orderBy(desc(locations.createdAt));
+  try {
+    const rows = await db
+      .select()
+      .from(locations)
+      .where(eq(locations.status, "approved"))
+      .orderBy(desc(locations.createdAt));
 
-  return rows.map((row) => toLocationRecord(row as LocationRecord));
+    return rows.map((row) => toLocationRecord(row as LocationRecord));
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 export async function listAllLocations() {
@@ -175,9 +191,20 @@ export async function listAllLocations() {
     );
   }
 
-  const rows = await db.select().from(locations).orderBy(desc(locations.createdAt));
+  try {
+    const rows = await db
+      .select()
+      .from(locations)
+      .orderBy(desc(locations.createdAt));
 
-  return rows.map((row) => toLocationRecord(row as LocationRecord));
+    return rows.map((row) => toLocationRecord(row as LocationRecord));
+  } catch (error) {
+    if (isMissingTableError(error)) {
+      return [];
+    }
+
+    throw error;
+  }
 }
 
 export async function createLocationSubmission(input: LocationSubmissionInput) {

@@ -8,7 +8,7 @@ const LocationMapClient = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[60vh] min-h-[420px] w-full items-center justify-center rounded-2xl border bg-card text-sm text-muted-foreground">
+      <div className="flex h-[58vh] min-h-[380px] w-full items-center justify-center rounded-2xl border bg-card text-sm text-muted-foreground sm:h-[62vh] sm:min-h-[460px] lg:h-[72vh]">
         Loading map...
       </div>
     ),

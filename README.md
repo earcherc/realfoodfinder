@@ -56,8 +56,9 @@ pnpm db:local:psql
 
 ## Routes
 
-- `/`: map-first landing page + location submission form.
+- `/`: map-first landing page.
 - `/locations`: approved location listing with details.
+- `/submit`: public location submission page.
 - `/admin`: moderation dashboard (approve/reject).
 
 ## Notes

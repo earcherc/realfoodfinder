@@ -56,7 +56,7 @@ export default function LocationMapClient({ locations }: LocationMapClientProps)
       center={center}
       zoom={DEFAULT_ZOOM}
       scrollWheelZoom
-      className="h-[60vh] min-h-[420px] w-full rounded-2xl"
+      className="h-[58vh] min-h-[380px] w-full rounded-2xl sm:h-[62vh] sm:min-h-[460px] lg:h-[72vh]"
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

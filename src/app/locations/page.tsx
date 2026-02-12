@@ -2,8 +2,6 @@ import { LocationCard } from "@/components/location-card";
 import { SiteHeader } from "@/components/site-header";
 import { listApprovedLocations } from "@/lib/location-repository";
 
-export const dynamic = "force-dynamic";
-
 export default async function LocationsPage() {
   const locations = await listApprovedLocations();
 

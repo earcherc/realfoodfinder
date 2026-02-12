@@ -23,7 +23,7 @@ export function SiteHeader() {
           <Leaf className="size-4 text-emerald-700" />
           Real Food Finder
         </Link>
-        <nav className="flex flex-nowrap items-center gap-1 sm:gap-2">
+        <nav className="flex flex-nowrap items-center gap-2">
           <Button
             size="sm"
             variant={isCurrent(pathname, "/") ? "secondary" : "ghost"}

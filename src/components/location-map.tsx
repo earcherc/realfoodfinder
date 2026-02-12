@@ -70,7 +70,7 @@ export function LocationMap({ locations }: LocationMapProps) {
               block: "start",
             });
           }}
-          className="absolute right-3 top-3 inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/90 px-3 py-1.5 text-xs font-medium shadow-sm backdrop-blur hover:bg-background"
+          className="pointer-events-auto absolute right-3 top-3 z-[1100] inline-flex items-center gap-2 rounded-full border border-border/80 bg-background/95 px-3 py-1.5 text-xs font-medium shadow-md backdrop-blur hover:bg-background"
         >
           <SlidersHorizontal className="size-3.5" />
           Filters

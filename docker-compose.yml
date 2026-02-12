@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: realfoodfinder-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: realfood
+      POSTGRES_PASSWORD: realfood
+      POSTGRES_DB: realfoodfinder
+    volumes:
+      - realfoodfinder_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U realfood -d realfoodfinder"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  realfoodfinder_postgres_data:

@@ -1,38 +1,68 @@
-# realfoodfinder
+# Real Food Finder
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Map-first app for sourcing real food directly from farms, homes, stores, and community drop points.
 
-## Getting Started
+## Stack
 
-First, run the development server:
+- Next.js (App Router)
+- shadcn/ui
+- Leaflet + react-leaflet (map)
+- Drizzle ORM + Neon/Postgres
+
+## Local setup
+
+1. Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create env file:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Fill in:
 
-## Learn More
+- `LOCAL_DATABASE_URL`: local Docker Postgres (default in `.env.example`).
+- `DATABASE_URL`: Neon URL for production/deployment.
+- `ADMIN_DASHBOARD_KEY`: optional key used by `/admin?key=...`.
 
-To learn more about Next.js, take a look at the following resources:
+4. Start local Postgres:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm db:local:up
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+5. Generate and run migrations:
 
-## Deploy on Vercel
+```bash
+pnpm db:generate
+pnpm db:migrate
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+6. Start dev server:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm dev
+```
+
+7. Optional local SQL access:
+
+```bash
+pnpm db:local:psql
+```
+
+## Routes
+
+- `/`: map-first landing page + location submission form.
+- `/locations`: approved location listing with details.
+- `/admin`: moderation dashboard (approve/reject).
+
+## Notes
+
+- DB URL priority is `LOCAL_DATABASE_URL` then `DATABASE_URL`.
+- If both are missing, the app falls back to in-memory sample data for quick development.
+- Neon docs often show `drizzle-orm/neon-http`, which is perfect for Neon-only apps. This project uses `drizzle-orm/node-postgres` so one setup works for both Neon and local Docker Postgres.
+- In production, lock down `/admin` with real auth (Clerk/Auth.js/etc.) instead of key-in-query.

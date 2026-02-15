@@ -84,6 +84,7 @@ export function LinkSubmissionForm() {
   const [values, setValues] = useState<FormValues>(DEFAULT_VALUES);
   const [countryOpen, setCountryOpen] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileWidgetKey, setTurnstileWidgetKey] = useState(0);
   const [productOtherValue, setProductOtherValue] = useState("");
   const [tagOtherValue, setTagOtherValue] = useState("");
   const [showProductOtherInput, setShowProductOtherInput] = useState(false);
@@ -149,13 +150,17 @@ export function LinkSubmissionForm() {
         }),
       });
 
+      if (turnstileSiteKey) {
+        setTurnstileToken("");
+        setTurnstileWidgetKey((current) => current + 1);
+      }
+
       if (!response.ok) {
         const payload = (await response.json()) as { message?: string };
         throw new Error(payload.message ?? "Could not submit link.");
       }
 
       setValues(DEFAULT_VALUES);
-      setTurnstileToken("");
       setProductOtherValue("");
       setTagOtherValue("");
       setShowProductOtherInput(false);
@@ -524,11 +529,11 @@ export function LinkSubmissionForm() {
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      
 
       {turnstileSiteKey ? (
         <div className="pt-1">
           <Turnstile
+            key={turnstileWidgetKey}
             sitekey={turnstileSiteKey}
             action="submit_link"
             onVerify={(token) => {

@@ -84,6 +84,7 @@ export function LocationSubmissionForm() {
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [values, setValues] = useState<FormValues>(DEFAULT_VALUES);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileWidgetKey, setTurnstileWidgetKey] = useState(0);
   const [foodOtherValue, setFoodOtherValue] = useState("");
   const [tagOtherValue, setTagOtherValue] = useState("");
   const [showFoodOtherInput, setShowFoodOtherInput] = useState(false);
@@ -102,6 +103,25 @@ export function LocationSubmissionForm() {
       (tag) => !TAG_OPTIONS.includes(tag as (typeof TAG_OPTIONS)[number]),
     );
   }, [values.tags]);
+  const canSubmit = useMemo(() => {
+    return (
+      values.foods.length > 0 &&
+      values.submitterEmail.trim().length > 0 &&
+      values.name.trim().length >= 2 &&
+      values.address.trim().length >= 5
+    );
+  }, [values.address, values.foods.length, values.name, values.submitterEmail]);
+  const submitHint = useMemo(() => {
+    if (values.foods.length === 0) {
+      return "Select at least one food item to enable submit.";
+    }
+
+    if (turnstileSiteKey && !turnstileToken) {
+      return "Complete captcha verification to enable submit.";
+    }
+
+    return null;
+  }, [turnstileSiteKey, turnstileToken, values.foods.length]);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -125,13 +145,17 @@ export function LocationSubmissionForm() {
         }),
       });
 
+      if (turnstileSiteKey) {
+        setTurnstileToken("");
+        setTurnstileWidgetKey((current) => current + 1);
+      }
+
       if (!response.ok) {
         const payload = (await response.json()) as { message?: string };
         throw new Error(payload.message ?? "Could not submit location.");
       }
 
       setValues(DEFAULT_VALUES);
-      setTurnstileToken("");
       setFoodOtherValue("");
       setTagOtherValue("");
       setShowFoodOtherInput(false);
@@ -156,6 +180,7 @@ export function LocationSubmissionForm() {
         <Input
           id="location-name"
           required
+          minLength={2}
           value={values.name}
           onChange={(event) =>
             setValues((current) => ({ ...current, name: event.target.value }))
@@ -193,6 +218,7 @@ export function LocationSubmissionForm() {
         <Input
           id="location-address"
           required
+          minLength={5}
           value={values.address}
           onChange={(event) =>
             setValues((current) => ({
@@ -469,11 +495,14 @@ export function LocationSubmissionForm() {
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      
+      {!error && !isSubmitted && submitHint ? (
+        <p className="text-xs text-muted-foreground">{submitHint}</p>
+      ) : null}
 
       {turnstileSiteKey ? (
         <div className="pt-1">
           <Turnstile
+            key={turnstileWidgetKey}
             sitekey={turnstileSiteKey}
             action="submit_location"
             onVerify={(token) => {
@@ -499,6 +528,7 @@ export function LocationSubmissionForm() {
         disabled={
           isSaving ||
           isSubmitted ||
+          !canSubmit ||
           (Boolean(turnstileSiteKey) && !turnstileToken)
         }
         className={cn(
